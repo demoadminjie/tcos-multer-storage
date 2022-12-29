@@ -6,5 +6,6 @@
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
   "transformIgnorePatterns": [
     "node_modules/(?!(multer|cos-nodejs-sdk-v5)/)"
-  ]
+  ],
+  "testTimeout": 20000
 }
