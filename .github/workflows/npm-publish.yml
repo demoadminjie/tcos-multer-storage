@@ -3,10 +3,12 @@
 
 name: Node.js Package
 
+# https://stackoverflow.com/questions/61891328/trigger-github-action-only-on-new-tags
 on:
   push:
-    branches:
-      - main
+    # Pattern matched against refs/tags
+    tags:        
+      - '*'           # Push events to every tag not containing /
 
 jobs:
   build:
