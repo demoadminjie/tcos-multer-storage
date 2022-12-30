@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import multer from 'multer';
-import tcosMulterStorageEngine from '../lib/main.js';
+import tcosMulterStorageEngine from '../lib/main.mjs';
 
 import dotenv from 'dotenv';
 dotenv.config();

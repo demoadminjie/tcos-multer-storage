@@ -46,7 +46,7 @@ app.listen(PORT, HOST, () => {
 app.use(cors());
 app.use(express.json());
 ```
-See more on the [**example**](https://github.com/demoadminjie/tcos-multer-storage/blob/main/src/example/app.js)
+See more on the [**example**](https://github.com/demoadminjie/tcos-multer-storage/blob/main/example/app.js)
  and the [**\_\_test\_\_**](https://github.com/demoadminjie/tcos-multer-storage/blob/main/src/__tests__/main.test.ts)
 <br>
 <br>
