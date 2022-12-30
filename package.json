@@ -1,6 +1,6 @@
 {
   "name": "tcos-multer-storage",
-  "version": "0.0.3",
+  "version": "0.0.31",
   "type": "module",
   "description": "multer-custom-storage",
   "main": "lib/index.cjs",
