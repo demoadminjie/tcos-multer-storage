@@ -3,9 +3,9 @@
   "version": "0.0.31",
   "type": "module",
   "description": "multer-custom-storage",
-  "main": "lib/index.cjs",
-  "module": "lib/index.mjs",
-  "typings": "lib/index.d.ts",
+  "main": "lib/main.cjs",
+  "module": "lib/main.mjs",
+  "typings": "lib/main.d.ts",
   "files": [
     "lib/**/*"
   ],
