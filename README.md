@@ -6,8 +6,15 @@ A Customer Multer Storage that store the upload file to the [TecentCloud Cloud O
 <br>
 ## Usage
 > ### Need the **TencentCloud permanent key** <br>
-> Get the **SecretId** and **SecretKey** on the [Manage API Key page](https://console.tencentcloud.com/cam/capi) in the CAM console.
+> Get the **SecretId** and **SecretKey** on the [Manage API Key page](https://console.tencentcloud.com/cam/capi) in the CAM console
 
+import or require
+```javascript
+import tcosMulterStorageEngine from 'tcos-multer-storage';
+//or
+const { default: tcosMulterStorageEngine } = require('tcos-multer-storage');
+```
+simple example:
 ```javascript
 import express from "express";
 import cors from "cors";
@@ -49,15 +56,11 @@ app.use(express.json());
 See more on the [**example**](https://github.com/demoadminjie/tcos-multer-storage/blob/main/example/app.js)
  and the [**\_\_test\_\_**](https://github.com/demoadminjie/tcos-multer-storage/blob/main/src/__tests__/main.test.ts)
 <br>
-<br>
+
 ## Todo
-<input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
-<label for="vehicle1"> Support be required as CommonJS </label><br>
-<input type="checkbox" id="vehicle2" name="vehicle2" value="Car">
-<label for="vehicle2"> Support be authorizated by using temporary key </label><br>
-<input type="checkbox" id="vehicle3" name="vehicle3" value="Boat">
-<label for="vehicle3"> Upload large file by using multipart operations </label><br>
-<br>
+- [x] Support be required as CommonJS
+- [ ] Support be authorizated by using temporary key
+- [ ] Upload large file by using multipart operations
 
 ## Reference
 - https://github.com/expressjs/multer/blob/master/StorageEngine.md
