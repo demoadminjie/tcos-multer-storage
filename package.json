@@ -6,6 +6,13 @@
   "main": "lib/main.cjs",
   "module": "lib/main.mjs",
   "typings": "lib/main.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib/main.cjs",
+      "import": "./lib/main.mjs",
+      "types": "./lib/main.d.ts"      
+    }
+  },
   "files": [
     "lib/**/*"
   ],
