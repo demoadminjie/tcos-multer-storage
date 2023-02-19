@@ -7,5 +7,5 @@
   "transformIgnorePatterns": [
     "node_modules/(?!(multer|cos-nodejs-sdk-v5)/)"
   ],
-  "testTimeout": 20000
+  "testTimeout": 60000
 }

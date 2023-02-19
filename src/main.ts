@@ -106,7 +106,6 @@ class TCStorageEngine implements multer.StorageEngine {
                   ContentLength: handleBufLen,
                   Body: Buffer.concat(bufs),
                 }, (err, data) => {
-                  console.log('upload', isProcess, partNumber, handleBufLen, err, data);
                   isProcess -= 1;
                   handleUploadProcess();
                   if (err) {
@@ -133,7 +132,6 @@ class TCStorageEngine implements multer.StorageEngine {
               };
 
               const completeUpload = () => {
-                console.log('parts', parts);
                 parts.sort((a, b) => a.PartNumber - b.PartNumber);
                 this.TCCOS.multipartComplete({
                   ...uploadParams,
