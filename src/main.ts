@@ -1,15 +1,7 @@
 import { Buffer } from 'buffer';
 import multer from 'multer';
 import { Request } from 'express';
-import COS, {
-  COSOptions,
-  Bucket,
-  Region,
-  Key,
-  DeleteObjectParams,
-  DeleteObjectResult,
-  Part
-} from 'cos-nodejs-sdk-v5';
+import COS, { COSOptions, Bucket, Region, Key, DeleteObjectParams, DeleteObjectResult, Part } from 'cos-nodejs-sdk-v5';
 
 type Options = {
   bucket: Bucket;
@@ -21,7 +13,7 @@ type Options = {
 
 interface CustomFileResult extends Partial<Express.Multer.File> {
   Location: string;
-};
+}
 
 // 每个切片字节长度不能小于 1m
 const MINI_MUM_SLICE = 1 * 1024 * 1024;
@@ -58,109 +50,114 @@ class TCStorageEngine implements multer.StorageEngine {
       },
       (err, data) => {
         if (data) {
-
-          this.TCCOS.multipartInit({
-            Bucket: this.Bucket,
-            Region: this.Region,
-            Key: this.Key || file.originalname,
-          }, (err, data) => {
-            if (err) {
-              cb(err);
-              return;
-            }
-            if (data) {
-
-              const { UploadId: uploadId } = data;
-              const { stream } = file;
-
-              const uploadParams = {
-                Bucket: this.Bucket,
-                Region: this.Region,
-                Key: this.Key || file.originalname,
-                UploadId: uploadId,
-              };
-
-              let parts: Part[] = [];
-
-              let partNumber = 0;
-              let handleBufLen = 0;
-
-              let bufs: Uint8Array[] = [];
-
-              let isProcess = 0;
-
-              const handleUploadProcess = () => {
-                if (isProcess >= MAX_UPLOAD_NUMS) {
-                  stream.pause();
-                } else {
-                  if (stream.isPaused()) {
-                    stream.resume();
-                  }
-                }
+          this.TCCOS.multipartInit(
+            {
+              Bucket: this.Bucket,
+              Region: this.Region,
+              Key: this.Key || file.originalname,
+            },
+            (initErr, initData) => {
+              if (initErr) {
+                cb(initErr);
+                return;
               }
+              if (initData) {
+                const { UploadId: uploadId } = initData;
+                const { stream } = file;
 
-              const uploadMultiPart = ({ partNumber, handleBufLen, bufs }: any) => {
-                this.TCCOS.multipartUpload({
-                  ...uploadParams,
-                  PartNumber: partNumber,
-                  ContentLength: handleBufLen,
-                  Body: Buffer.concat(bufs),
-                }, (err, data) => {
-                  isProcess -= 1;
-                  handleUploadProcess();
-                  if (err) {
-                    cb(err);
-                  } else if (data) {
-                    parts.push({ ETag: data.ETag, PartNumber: partNumber });
-                    if (isProcess === 0) {
-                      completeUpload();
+                const uploadParams = {
+                  Bucket: this.Bucket,
+                  Region: this.Region,
+                  Key: this.Key || file.originalname,
+                  UploadId: uploadId,
+                };
+
+                const parts: Part[] = [];
+
+                let partNumber = 0;
+                let handleBufLen = 0;
+
+                let bufs: Uint8Array[] = [];
+
+                let isProcess = 0;
+
+                const handleUploadProcess = () => {
+                  if (isProcess >= MAX_UPLOAD_NUMS) {
+                    stream.pause();
+                  } else {
+                    if (stream.isPaused()) {
+                      stream.resume();
                     }
                   }
+                };
+
+                const uploadMultiPart = ({ no, bufLen, bodyBufs }: any) => {
+                  this.TCCOS.multipartUpload(
+                    {
+                      ...uploadParams,
+                      PartNumber: no,
+                      ContentLength: bufLen,
+                      Body: Buffer.concat(bodyBufs),
+                    },
+                    (uploadErr, uploadData) => {
+                      isProcess -= 1;
+                      handleUploadProcess();
+                      if (uploadErr) {
+                        cb(uploadErr);
+                      } else if (uploadData) {
+                        parts.push({ ETag: uploadData.ETag, PartNumber: no });
+                        if (isProcess === 0) {
+                          completeUpload();
+                        }
+                      }
+                    },
+                  );
+                };
+
+                const handleUploadContent = (len: number) => {
+                  handleBufLen += len;
+                  if (handleBufLen >= MINI_MUM_SLICE) {
+                    isProcess += 1;
+                    handleUploadProcess();
+                    partNumber += 1;
+                    uploadMultiPart({ partNumber, handleBufLen, bufs });
+                    handleBufLen = 0;
+                    bufs = [];
+                  }
+                };
+
+                const completeUpload = () => {
+                  parts.sort((a, b) => a.PartNumber - b.PartNumber);
+                  this.TCCOS.multipartComplete(
+                    {
+                      ...uploadParams,
+                      Parts: parts,
+                    },
+                    cb,
+                  );
+                };
+
+                stream.on('data', (chunk) => {
+                  bufs.push(chunk);
+                  handleUploadContent(chunk.length);
                 });
+
+                stream.on('end', () => {
+                  if (bufs.length !== 0) {
+                    isProcess += 1;
+                    partNumber += 1;
+                    uploadMultiPart({ partNumber, handleBufLen, bufs });
+                    handleBufLen = 0;
+                    bufs = [];
+                  } else {
+                    completeUpload();
+                  }
+                });
+              } else {
+                cb(new Error('initial multipart uploads error.'));
               }
-
-              const handleUploadContent = (len: number) => {
-                handleBufLen += len;
-                if (handleBufLen >= MINI_MUM_SLICE) {
-                  isProcess += 1;
-                  handleUploadProcess();
-                  partNumber += 1;
-                  uploadMultiPart({ partNumber, handleBufLen, bufs })
-                  handleBufLen = 0;
-                  bufs = [];
-                }
-              };
-
-              const completeUpload = () => {
-                parts.sort((a, b) => a.PartNumber - b.PartNumber);
-                this.TCCOS.multipartComplete({
-                  ...uploadParams,
-                  Parts: parts
-                }, cb);
-              };
-
-              stream.on('data', (chunk) => {
-                bufs.push(chunk);
-                handleUploadContent(chunk.length);
-              });
-
-              stream.on('end', () => {
-                if (bufs.length !== 0) {
-                  isProcess += 1;
-                  partNumber += 1;
-                  uploadMultiPart({ partNumber, handleBufLen, bufs });
-                  handleBufLen = 0;
-                  bufs = [];
-                } else {
-                  completeUpload();
-                }
-              });
-
-            } else {
-              cb(new Error('initial multipart uploads error.'))
-            }
-          })
-
+            },
+          );
         } else if (err?.statusCode === 404) {
           // 存储桶不存在
           cb(new Error('bucket is not exist.'));
