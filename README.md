@@ -60,7 +60,7 @@ See more on the [**example**](https://github.com/demoadminjie/tcos-multer-storag
 ## Todo
 - [x] Support be required as CommonJS
 - [ ] Support be authorizated by using temporary key
-- [ ] Upload large file by using multipart operations
+- [x] Upload large file by using multipart operations
 
 ## Reference
 - https://github.com/expressjs/multer/blob/master/StorageEngine.md
