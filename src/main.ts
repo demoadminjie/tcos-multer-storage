@@ -148,11 +148,11 @@ class TCStorageEngine implements multer.StorageEngine {
                 if (bufs.length !== 0) {
                   isProcess += 1;
                   partNumber += 1;
-                  uploadMultiPart({ partNumber, handleBufLen, bufs })
+                  uploadMultiPart({ partNumber, handleBufLen, bufs });
                   handleBufLen = 0;
                   bufs = [];
                 } else {
-                  completeUpload;
+                  completeUpload();
                 }
               });
 
