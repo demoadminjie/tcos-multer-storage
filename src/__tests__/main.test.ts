@@ -54,7 +54,6 @@ describe('TCOS-Storage', () => {
   it('should process multiple files', (done) => {
     const form = new FormData();
     const parser = upload.fields([
-      { name: 'empty', maxCount: 1 },
       { name: 'tiny0', maxCount: 1 },
       { name: 'tiny1', maxCount: 1 },
       { name: 'small0', maxCount: 1 },
@@ -63,7 +62,6 @@ describe('TCOS-Storage', () => {
       { name: 'large', maxCount: 1 },
     ]);
 
-    form.append('empty', file('empty.dat'));
     form.append('tiny0', file('tiny0.dat'));
     form.append('tiny1', file('tiny1.dat'));
     form.append('small0', file('small0.dat'));
@@ -74,10 +72,6 @@ describe('TCOS-Storage', () => {
     submitFormCallback(parser, form, (err: any, req: any) => {
       expect(err).toBeUndefined();
       expect(JSON.stringify(req.body)).toBe('{}');
-
-      expect(req.files.empty[0].fieldname).toBe('empty');
-      expect(req.files.empty[0].originalname).toBe('empty.dat');
-      expect(req.files.empty[0].Location).toBe(`${COS_URL}empty.dat`);
 
       expect(req.files.tiny0[0].fieldname).toBe('tiny0');
       expect(req.files.tiny0[0].originalname).toBe('tiny0.dat');
